@@ -5,7 +5,6 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
@@ -13,47 +12,49 @@ import android.widget.Toast;
 
 public class MainActivity extends Activity {
 
+    private boolean mTwoPane;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        if (savedInstanceState == null) {
-            getFragmentManager().beginTransaction()
-                    .add(R.id.container, new ForecastFragment())
-                    .commit();
-        }
 
-        Log.d("LIFECYCLE", "onCreate Called");
+        if (findViewById(R.id.weather_detail_container) != null){
+            mTwoPane = true;
+
+            if (savedInstanceState == null){
+                getFragmentManager().beginTransaction()
+                        .replace(R.id.weather_detail_container, new DetailFragment())
+                        .commit();
+            }
+        }else{
+            mTwoPane = false;
+        }
     }
 
     @Override
     protected void onStart() {
         super.onStart();
-        Log.d("LIFECYCLE", "onStart Called");
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        Log.d("LIFECYCLE", "onResume Called");
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-        Log.d("LIFECYCLE", "onPause Called");
     }
 
     @Override
     protected void onStop() {
         super.onStop();
-        Log.d("LIFECYCLE", "onStop Called");
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        Log.d("LIFECYCLE", "onDestroy Called");
     }
 
     @Override

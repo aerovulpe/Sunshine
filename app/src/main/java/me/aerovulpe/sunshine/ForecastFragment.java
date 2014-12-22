@@ -16,8 +16,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ListView;
-import android.widget.SimpleCursorAdapter;
-import android.widget.TextView;
 
 import java.util.Date;
 
@@ -32,7 +30,7 @@ import static me.aerovulpe.sunshine.data.WeatherContract.WeatherEntry;
 public class ForecastFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor> {
     public static final String EXTRA_WEATHER_DATE = "me.aerovulpe.sunshine.extra.WEATHER_DETAILS";
     ListView mListView;
-    SimpleCursorAdapter mForecastAdapter;
+    ForecastAdapter mForecastAdapter;
 
     private static final int FORECAST_LOADER = 0;
     private String mLocation;
@@ -47,6 +45,7 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
             // using the location set by the user, which is only in the Location table.
             // So the convenience is worth it.
             WeatherEntry.TABLE_NAME + "." + WeatherEntry._ID,
+            WeatherEntry.COLUMN_WEATHER_ID,
             WeatherEntry.COLUMN_DATETEXT,
             WeatherEntry.COLUMN_SHORT_DESC,
             WeatherEntry.COLUMN_MAX_TEMP,
@@ -56,12 +55,12 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
 
     // These indices are tied to FORECAST_COLUMNS.  If FORECAST_COLUMNS changes, these
     // must change.
-    public static final int COL_WEATHER_ID = 0;
-    public static final int COL_WEATHER_DATE = 1;
-    public static final int COL_WEATHER_DESC = 2;
-    public static final int COL_WEATHER_MAX_TEMP = 3;
-    public static final int COL_WEATHER_MIN_TEMP = 4;
-    public static final int COL_LOCATION_SETTING = 5;
+    public static final int COL_WEATHER_ID = 1;
+    public static final int COL_WEATHER_DATE = 2;
+    public static final int COL_WEATHER_DESC = 3;
+    public static final int COL_WEATHER_MAX_TEMP = 4;
+    public static final int COL_WEATHER_MIN_TEMP = 5;
+    public static final int COL_LOCATION_SETTING = 6;
 
     public ForecastFragment() {
     }
@@ -73,24 +72,7 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
 
         // The SimpleCursorAdapter will take data from the database through the
         // Loader and use it to populate the ListView it's attached to.
-        mForecastAdapter = new SimpleCursorAdapter(
-                getActivity(),
-                R.layout.list_item_forecast,
-                null,
-                // the column names to use to fill the textviews
-                new String[]{WeatherContract.WeatherEntry.COLUMN_DATETEXT,
-                        WeatherContract.WeatherEntry.COLUMN_SHORT_DESC,
-                        WeatherContract.WeatherEntry.COLUMN_MAX_TEMP,
-                        WeatherContract.WeatherEntry.COLUMN_MIN_TEMP
-                },
-                // the textviews to fill with the data pulled from the columns above
-                new int[]{R.id.list_item_date_textview,
-                        R.id.list_item_detail_textview,
-                        R.id.list_item_high_textview,
-                        R.id.list_item_low_textview
-                },
-                0
-        );
+        mForecastAdapter = new ForecastAdapter(getActivity(), null, 0);
     }
 
     @Override
@@ -104,7 +86,7 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
         mListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                SimpleCursorAdapter adapter = (SimpleCursorAdapter) parent.getAdapter();
+                ForecastAdapter adapter = (ForecastAdapter) parent.getAdapter();
                 Cursor cursor = adapter.getCursor();
 
                 if (cursor != null && cursor.moveToPosition(position)){
@@ -115,30 +97,6 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
                 }
             }
         });
-
-        mForecastAdapter.setViewBinder(new SimpleCursorAdapter.ViewBinder() {
-            @Override
-            public boolean setViewValue(View view, Cursor cursor, int columnIndex) {
-                boolean isMetric = Utility.isMetric(getActivity());
-                switch (columnIndex) {
-                    case COL_WEATHER_MAX_TEMP:
-                    case COL_WEATHER_MIN_TEMP: {
-                        // we have to do some formatting and possibly a conversion
-                        ((TextView) view).setText(Utility.formatTemperature(
-                                cursor.getDouble(columnIndex), isMetric));
-                        return true;
-                    }
-                    case COL_WEATHER_DATE: {
-                        String dateString = cursor.getString(columnIndex);
-                        TextView dateView = (TextView) view;
-                        dateView.setText(Utility.formatDate(dateString));
-                        return true;
-                    }
-                }
-                return false;
-            }
-        });
-
         return rootView;
     }
 
