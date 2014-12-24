@@ -3,7 +3,6 @@ package me.aerovulpe.sunshine;
 import android.app.Fragment;
 import android.app.LoaderManager;
 import android.content.CursorLoader;
-import android.content.Intent;
 import android.content.Loader;
 import android.database.Cursor;
 import android.net.Uri;
@@ -28,12 +27,25 @@ import static me.aerovulpe.sunshine.data.WeatherContract.WeatherEntry;
  * Created by Aaron on 30/11/2014.
  */
 public class ForecastFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor> {
+    /**
+     * A callback interface that all activities containing this fragment must
+     * implement. This mechanism allows activities to be notified of item
+     * selections.
+     */
+    public static interface Callback {
+        /**
+         * Callback for when an item has been selected.
+         */
+        public void onItemSelected(String date);
+    }
+
     public static final String EXTRA_WEATHER_DATE = "me.aerovulpe.sunshine.extra.WEATHER_DETAILS";
     ListView mListView;
     ForecastAdapter mForecastAdapter;
 
     private static final int FORECAST_LOADER = 0;
     private String mLocation;
+    private int mPosition;
 
     // For the forecast view we're showing only a small subset of the stored data.
     // Specify the columns we need.
@@ -77,7 +89,7 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
+                             final Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_main, container, false);
 
         mListView = (ListView) rootView.findViewById(R.id.listview_forecast);
@@ -91,12 +103,12 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
 
                 if (cursor != null && cursor.moveToPosition(position)){
                     String forecastDate = cursor.getString(COL_WEATHER_DATE);
-                    Intent intent = new Intent(getActivity(), DetailActivity.class);
-                    intent.putExtra(EXTRA_WEATHER_DATE, forecastDate);
-                    startActivity(intent);
+                    ((Callback)getActivity()).onItemSelected(forecastDate);
+                    mPosition = position;
                 }
             }
         });
+        if (savedInstanceState != null) mPosition = savedInstanceState.getInt("POSITION_KEY");
         return rootView;
     }
 
@@ -114,6 +126,7 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
     @Override
     public void onResume() {
         super.onResume();
+        updateWeather();
         if (mLocation != null && !mLocation.equals(Utility.getPreferredLocation(getActivity()))) {
             getLoaderManager().restartLoader(FORECAST_LOADER, null, this);
         }
@@ -132,6 +145,12 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
                 return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        if (mPosition != ListView.INVALID_POSITION) outState.putInt("POSITION_KEY", mPosition);
+        super.onSaveInstanceState(outState);
     }
 
     @Override
@@ -166,6 +185,7 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
         mForecastAdapter.swapCursor(data);
+        mListView.setSelection(mPosition);
     }
 
     @Override

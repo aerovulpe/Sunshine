@@ -6,6 +6,7 @@
               android:minHeight="?android:attr/listPreferredItemHeight"
               android:orientation="horizontal"
               android:padding="10dp"
+              android:background="@drawable/touch_selector"
               android:id="@+id/listview_forecast_top">
 
     <ImageView

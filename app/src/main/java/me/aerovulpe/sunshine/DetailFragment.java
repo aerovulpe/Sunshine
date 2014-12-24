@@ -21,8 +21,8 @@ import android.widget.TextView;
 import me.aerovulpe.sunshine.data.WeatherContract;
 
 /**
-* Created by Aaron on 20/12/2014.
-*/
+ * Created by Aaron on 20/12/2014.
+ */
 public class DetailFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor> {
     private static final int FORECAST_DETAIL_LOADER = 1;
     private ShareActionProvider mShareActionProvider;
@@ -70,11 +70,20 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
 
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
-        mDateStr = getActivity()
-                .getIntent()
-                .getStringExtra(ForecastFragment.EXTRA_WEATHER_DATE);
-        getLoaderManager().initLoader(FORECAST_DETAIL_LOADER, null, this);
+        if (getArguments() != null && getArguments().containsKey(ForecastFragment.EXTRA_WEATHER_DATE)) {
+            mDateStr = getArguments().getString(ForecastFragment.EXTRA_WEATHER_DATE);
+            getLoaderManager().initLoader(FORECAST_DETAIL_LOADER, null, this);
+        }
         super.onActivityCreated(savedInstanceState);
+    }
+
+    @Override
+    public void onResume() {
+        if (getArguments() != null && getArguments().containsKey(ForecastFragment.EXTRA_WEATHER_DATE)) {
+            mDateStr = getArguments().getString(ForecastFragment.EXTRA_WEATHER_DATE);
+            getLoaderManager().restartLoader(FORECAST_DETAIL_LOADER, null, this);
+        }
+        super.onResume();
     }
 
     @Override
@@ -93,33 +102,37 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
                 // The asynchronous load is complete and the data
                 // is now available for use.
 
-                if (!data.moveToFirst()) return;
-
-                boolean isMetric = Utility.isMetric(getActivity());
-
-                mDateView.setText(Utility.getDayName(getActivity(), data.getString(data
-                        .getColumnIndex(WeatherContract.WeatherEntry.COLUMN_DATETEXT))) + "\n"
-                + Utility.getFormattedMonthDay(getActivity(), data.getString(data
-                        .getColumnIndex(WeatherContract.WeatherEntry.COLUMN_DATETEXT))));
-                mDetailView.setText(data.getString(data
-                        .getColumnIndex(WeatherContract.WeatherEntry.COLUMN_SHORT_DESC)));
-                mHighView.setText(Utility.formatTemperature(getActivity(), data.getDouble(data
-                                .getColumnIndex(WeatherContract.WeatherEntry.COLUMN_MAX_TEMP)),
-                        isMetric));
-                mLowView.setText(Utility.formatTemperature(getActivity(),data.getDouble(data
-                                .getColumnIndex(WeatherContract.WeatherEntry.COLUMN_MIN_TEMP)),
-                        isMetric));
-                mHumidityView.setText(String.format(getActivity().getString(R.string.format_humidity),
-                        data.getDouble(data.getColumnIndex(WeatherContract.WeatherEntry.COLUMN_HUMIDITY))));
-                mWindView.setText(Utility.getFormattedWind(getActivity(),
-                        data.getFloat(data.getColumnIndex(WeatherContract.WeatherEntry.COLUMN_WIND_SPEED)),
-                        data.getFloat(data.getColumnIndex(WeatherContract.WeatherEntry.COLUMN_WIND_SPEED))));
-                mPressureView.setText(String.format(getActivity().getString(R.string.format_pressure),
-                        data.getDouble(data.getColumnIndex(WeatherContract.WeatherEntry.COLUMN_PRESSURE))));
-                mIconView.setImageResource(Utility.getArtResourceForWeatherCondition( data.getInt(data
-                        .getColumnIndex(WeatherContract.WeatherEntry.COLUMN_WEATHER_ID))));
+                populateViews(data);
                 break;
         }
+    }
+
+    private void populateViews(Cursor data) {
+        if (!data.moveToFirst()) return;
+
+        boolean isMetric = Utility.isMetric(getActivity());
+
+        mDateView.setText(Utility.getDayName(getActivity(), data.getString(data
+                .getColumnIndex(WeatherContract.WeatherEntry.COLUMN_DATETEXT))) + "\n"
+                + Utility.getFormattedMonthDay(getActivity(), data.getString(data
+                .getColumnIndex(WeatherContract.WeatherEntry.COLUMN_DATETEXT))));
+        mDetailView.setText(data.getString(data
+                .getColumnIndex(WeatherContract.WeatherEntry.COLUMN_SHORT_DESC)));
+        mHighView.setText(Utility.formatTemperature(getActivity(), data.getDouble(data
+                        .getColumnIndex(WeatherContract.WeatherEntry.COLUMN_MAX_TEMP)),
+                isMetric));
+        mLowView.setText(Utility.formatTemperature(getActivity(), data.getDouble(data
+                        .getColumnIndex(WeatherContract.WeatherEntry.COLUMN_MIN_TEMP)),
+                isMetric));
+        mHumidityView.setText(String.format(getActivity().getString(R.string.format_humidity),
+                data.getDouble(data.getColumnIndex(WeatherContract.WeatherEntry.COLUMN_HUMIDITY))));
+        mWindView.setText(Utility.getFormattedWind(getActivity(),
+                data.getFloat(data.getColumnIndex(WeatherContract.WeatherEntry.COLUMN_WIND_SPEED)),
+                data.getFloat(data.getColumnIndex(WeatherContract.WeatherEntry.COLUMN_WIND_SPEED))));
+        mPressureView.setText(String.format(getActivity().getString(R.string.format_pressure),
+                data.getDouble(data.getColumnIndex(WeatherContract.WeatherEntry.COLUMN_PRESSURE))));
+        mIconView.setImageResource(Utility.getArtResourceForWeatherCondition(data.getInt(data
+                .getColumnIndex(WeatherContract.WeatherEntry.COLUMN_WEATHER_ID))));
     }
 
     @Override

@@ -57,8 +57,7 @@
         android:layout_height="wrap_content"
         android:minWidth="100dp"
         android:minHeight="100dp"
-        android:id="@+id/detail_view_icon_textview"
-        />
+        android:id="@+id/detail_view_icon_textview"/>
 
     <TextView
         android:layout_width="wrap_content"
@@ -66,7 +65,8 @@
         android:textAppearance="?android:attr/textAppearanceSmall"
         android:id="@+id/detail_view_detail_textview"
         android:layout_marginLeft="28dp"
-        android:layout_marginStart="28dp"/>
+        android:layout_marginStart="28dp"
+        android:gravity="center"/>
     </LinearLayout>
 
     <TextView

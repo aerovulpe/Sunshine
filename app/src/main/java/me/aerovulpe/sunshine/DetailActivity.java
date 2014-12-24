@@ -14,8 +14,14 @@ public class DetailActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_detail);
         if (savedInstanceState == null) {
+            String date = getIntent()
+                    .getStringExtra(ForecastFragment.EXTRA_WEATHER_DATE);
+            Bundle args = new Bundle();
+            args.putString(ForecastFragment.EXTRA_WEATHER_DATE, date);
+            DetailFragment swap = new DetailFragment();
+            swap.setArguments(args);
             getFragmentManager().beginTransaction()
-                    .add(R.id.weather_detail_container, new DetailFragment())
+                    .replace(R.id.weather_detail_container, swap)
                     .commit();
         }
     }

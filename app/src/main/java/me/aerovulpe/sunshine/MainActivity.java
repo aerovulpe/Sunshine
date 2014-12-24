@@ -10,7 +10,7 @@ import android.view.MenuItem;
 import android.widget.Toast;
 
 
-public class MainActivity extends Activity {
+public class MainActivity extends Activity implements ForecastFragment.Callback{
 
     private boolean mTwoPane;
 
@@ -102,6 +102,23 @@ public class MainActivity extends Activity {
         }else{
             //No Application can handle your intent
             Toast.makeText(this, "No map application installed. :(", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    @Override
+    public void onItemSelected(String date) {
+        if (mTwoPane){
+            Bundle args = new Bundle();
+            args.putString(ForecastFragment.EXTRA_WEATHER_DATE, date);
+            DetailFragment swap = new DetailFragment();
+            swap.setArguments(args);
+            getFragmentManager().beginTransaction()
+                    .replace(R.id.weather_detail_container, swap)
+                    .commit();
+        }else {
+            Intent intent = new Intent(this, DetailActivity.class);
+            intent.putExtra(ForecastFragment.EXTRA_WEATHER_DATE, date);
+            startActivity(intent);
         }
     }
 }

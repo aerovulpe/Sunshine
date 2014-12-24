@@ -3,6 +3,7 @@
               android:orientation="horizontal"
               android:layout_width="match_parent"
               android:layout_height="wrap_content"
+              android:background="@drawable/touch_selector"
     android:padding="15dp">
 
     <LinearLayout

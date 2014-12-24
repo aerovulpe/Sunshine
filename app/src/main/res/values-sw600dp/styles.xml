@@ -1,0 +1,8 @@
+<resources>
+
+    <style name="ForecastListStyle">
+       <item name="android:choiceMode">singleChoice</item>
+        <item name="android:listChoiceIndicatorSingle">@drawable/touch_selector</item>
+    </style>
+
+</resources>
