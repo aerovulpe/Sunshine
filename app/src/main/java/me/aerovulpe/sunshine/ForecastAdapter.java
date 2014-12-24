@@ -17,7 +17,11 @@ public class ForecastAdapter extends CursorAdapter {
 
     private static final int VIEW_TYPE_TODAY = 0;
     private static final int VIEW_TYPE_FUTURE_DAY = 1;
+    private boolean mIsSinglePane;
 
+    public void setIsSinglePane(boolean isSinglePane) {
+        mIsSinglePane = isSinglePane;
+    }
 
     public ForecastAdapter(Context context, Cursor c, int flags) {
         super(context, c, flags);
@@ -25,7 +29,7 @@ public class ForecastAdapter extends CursorAdapter {
 
     @Override
     public int getItemViewType(int position) {
-        return position == 0 ? VIEW_TYPE_TODAY : VIEW_TYPE_FUTURE_DAY;
+        return (position == 0 && mIsSinglePane) ? VIEW_TYPE_TODAY : VIEW_TYPE_FUTURE_DAY;
     }
 
     @Override
@@ -63,6 +67,7 @@ public class ForecastAdapter extends CursorAdapter {
         // Read weather forecast from cursor
         String description = cursor.getString(ForecastFragment.COL_WEATHER_DESC);
         holder.descriptionView.setText(description);
+        holder.iconView.setContentDescription(description);
 
         // Read user preference for metric or imperial temperature units
         boolean isMetric = Utility.isMetric(context);
@@ -89,7 +94,7 @@ public class ForecastAdapter extends CursorAdapter {
         public final TextView lowTempView;
 
         public ViewHolder(View view) {
-            iconView = (ImageView) view.findViewById(R.id.list_item_icon_imageview);
+            iconView = (ImageView) view.findViewById(R.id.list_item_icon);
             dateView = (TextView) view.findViewById(R.id.list_item_date_textview);
             descriptionView = (TextView) view.findViewById(R.id.list_item_detail_textview);
             highTempView = (TextView) view.findViewById(R.id.list_item_high_textview);

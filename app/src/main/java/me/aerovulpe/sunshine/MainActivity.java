@@ -30,6 +30,7 @@ public class MainActivity extends Activity implements ForecastFragment.Callback{
         }else{
             mTwoPane = false;
         }
+        ((ForecastFragment)getFragmentManager().findFragmentById(R.id.fragment_forecast)).setIsSinglePane(!mTwoPane);
     }
 
     @Override

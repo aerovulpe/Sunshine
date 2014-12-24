@@ -30,6 +30,7 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
     private String mForecastStr;
     private String mDateStr;
 
+    TextView mDayView;
     TextView mDateView;
     TextView mDetailView;
     TextView mHighView;
@@ -56,14 +57,15 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_detail, container, false);
 
-        mDateView = (TextView) rootView.findViewById(R.id.detail_view_date_textview);
-        mDetailView = (TextView) rootView.findViewById(R.id.detail_view_detail_textview);
-        mHighView = (TextView) rootView.findViewById(R.id.detail_view_high_textview);
-        mLowView = (TextView) rootView.findViewById(R.id.detail_view_low_textview);
-        mHumidityView = (TextView) rootView.findViewById(R.id.detail_view_humidity_textview);
-        mWindView = (TextView) rootView.findViewById(R.id.detail_view_wind_textview);
-        mPressureView = (TextView) rootView.findViewById(R.id.detail_view_pressure_textview);
-        mIconView = (ImageView) rootView.findViewById(R.id.detail_view_icon_textview);
+        mDayView = (TextView) rootView.findViewById(R.id.detail_day_textview);
+        mDateView = (TextView) rootView.findViewById(R.id.detail_date_textview);
+        mDetailView = (TextView) rootView.findViewById(R.id.detail_forecast_textview);
+        mHighView = (TextView) rootView.findViewById(R.id.detail_high_textview);
+        mLowView = (TextView) rootView.findViewById(R.id.detail_low_textview);
+        mHumidityView = (TextView) rootView.findViewById(R.id.detail_humidity_textview);
+        mWindView = (TextView) rootView.findViewById(R.id.detail_wind_textview);
+        mPressureView = (TextView) rootView.findViewById(R.id.detail_pressure_textview);
+        mIconView = (ImageView) rootView.findViewById(R.id.detail_icon);
 
         return rootView;
     }
@@ -112,9 +114,9 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
 
         boolean isMetric = Utility.isMetric(getActivity());
 
-        mDateView.setText(Utility.getDayName(getActivity(), data.getString(data
-                .getColumnIndex(WeatherContract.WeatherEntry.COLUMN_DATETEXT))) + "\n"
-                + Utility.getFormattedMonthDay(getActivity(), data.getString(data
+        mDayView.setText(Utility.getDayName(getActivity(), data.getString(data
+                .getColumnIndex(WeatherContract.WeatherEntry.COLUMN_DATETEXT))));
+        mDateView.setText(Utility.getFormattedMonthDay(getActivity(), data.getString(data
                 .getColumnIndex(WeatherContract.WeatherEntry.COLUMN_DATETEXT))));
         mDetailView.setText(data.getString(data
                 .getColumnIndex(WeatherContract.WeatherEntry.COLUMN_SHORT_DESC)));
@@ -133,6 +135,8 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
                 data.getDouble(data.getColumnIndex(WeatherContract.WeatherEntry.COLUMN_PRESSURE))));
         mIconView.setImageResource(Utility.getArtResourceForWeatherCondition(data.getInt(data
                 .getColumnIndex(WeatherContract.WeatherEntry.COLUMN_WEATHER_ID))));
+        mIconView.setContentDescription(data.getString(data
+                .getColumnIndex(WeatherContract.WeatherEntry.COLUMN_SHORT_DESC)));
     }
 
     @Override

@@ -193,6 +193,10 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
         mForecastAdapter.swapCursor(null);
     }
 
+    public void setIsSinglePane(boolean isSinglePane){
+        if (mForecastAdapter != null) mForecastAdapter.setIsSinglePane(isSinglePane);
+    }
+
     private void updateWeather() {
         String location = Utility.getPreferredLocation(getActivity());
         new FetchWeatherTask(getActivity()).execute(location);
