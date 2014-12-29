@@ -2,12 +2,11 @@ package me.aerovulpe.sunshine;
 
 import android.app.Activity;
 import android.content.Intent;
-import android.net.Uri;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.Toast;
+
+import me.aerovulpe.sunshine.sync.SunshineSyncAdapter;
 
 
 public class MainActivity extends Activity implements ForecastFragment.Callback{
@@ -31,6 +30,7 @@ public class MainActivity extends Activity implements ForecastFragment.Callback{
             mTwoPane = false;
         }
         ((ForecastFragment)getFragmentManager().findFragmentById(R.id.fragment_forecast)).setIsSinglePane(!mTwoPane);
+        SunshineSyncAdapter.initializeSyncAdapter(this);
     }
 
     @Override
@@ -77,33 +77,9 @@ public class MainActivity extends Activity implements ForecastFragment.Callback{
             Intent intent = new Intent(this, SettingsActivity.class);
             startActivity(intent);
             return true;
-        }else if(id == R.id.action_map){
-            openPreferredLocationInMap();
         }
 
         return super.onOptionsItemSelected(item);
-    }
-
-    private void openPreferredLocationInMap() {
-        String location = PreferenceManager.getDefaultSharedPreferences(this)
-                .getString(getString(R.string.pref_location_key), getString(R.string.pref_location_default));
-
-        Uri geoLocation = Uri.parse("geo:0,0")
-                .buildUpon()
-                .appendQueryParameter("q", location)
-                .build();
-
-        Intent intent = new Intent();
-        intent.setAction(Intent.ACTION_VIEW);
-        intent.setData(geoLocation);
-
-        if (intent.resolveActivity(getPackageManager()) != null) {
-            //Then there is application can handle your intent
-            startActivity(intent);
-        }else{
-            //No Application can handle your intent
-            Toast.makeText(this, "No map application installed. :(", Toast.LENGTH_SHORT).show();
-        }
     }
 
     @Override

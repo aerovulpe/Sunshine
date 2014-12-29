@@ -6,8 +6,8 @@
           android:orderInCategory="100"
           android:showAsAction="never"/>
 
-    <item
-        android:id="@+id/action_refresh"
-        android:title="@string/action_refresh"
-        android:showAsAction="never"/>
+    <item android:id="@+id/action_map"
+          android:title="@string/show_location_on_map"
+          android:showAsAction="never"/>
+
 </menu>

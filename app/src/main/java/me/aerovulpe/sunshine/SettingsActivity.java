@@ -2,12 +2,14 @@ package me.aerovulpe.sunshine;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.preference.CheckBoxPreference;
 import android.preference.ListPreference;
 import android.preference.Preference;
 import android.preference.PreferenceActivity;
 import android.preference.PreferenceManager;
 
 import me.aerovulpe.sunshine.data.WeatherContract;
+import me.aerovulpe.sunshine.sync.SunshineSyncAdapter;
 
 
 /**
@@ -37,6 +39,7 @@ public class SettingsActivity extends PreferenceActivity
         // updated when the preference changes.
         bindPreferenceSummaryToValue(findPreference(getString(R.string.pref_location_key)));
         bindPreferenceSummaryToValue(findPreference(getString(R.string.pref_units_key)));
+        bindPreferenceSummaryToValue(findPreference(getString(R.string.pref_notification_key)));
     }
 
 
@@ -51,14 +54,19 @@ public class SettingsActivity extends PreferenceActivity
         // Set the listener to watch for value changes.
         preference.setOnPreferenceChangeListener(this);
 
-
         // Trigger the listener immediately with the preference's
         // current value.
-        onPreferenceChange(preference,
-                PreferenceManager
-                        .getDefaultSharedPreferences(preference.getContext())
-                        .getString(preference.getKey(), ""));
-
+        if (preference instanceof CheckBoxPreference) {
+            onPreferenceChange(preference,
+                    PreferenceManager
+                            .getDefaultSharedPreferences(preference.getContext())
+                            .getBoolean(preference.getKey(), true));
+        } else {
+            onPreferenceChange(preference,
+                    PreferenceManager
+                            .getDefaultSharedPreferences(preference.getContext())
+                            .getString(preference.getKey(), ""));
+        }
         mBindingPreference = false;
     }
 
@@ -68,11 +76,9 @@ public class SettingsActivity extends PreferenceActivity
         String stringValue = value.toString();
 
         // are we starting the preference activity?
-        if ( !mBindingPreference ) {
+        if (!mBindingPreference) {
             if (preference.getKey().equals(getString(R.string.pref_location_key))) {
-                FetchWeatherTask weatherTask = new FetchWeatherTask(this);
-                String location = value.toString();
-                weatherTask.execute(location);
+                SunshineSyncAdapter.syncImmediately(this);
             } else {
                 // notify code that weather may be impacted
                 getContentResolver().notifyChange(WeatherContract.WeatherEntry.CONTENT_URI, null);

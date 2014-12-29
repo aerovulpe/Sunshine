@@ -3,10 +3,12 @@ package me.aerovulpe.sunshine;
 import android.app.Fragment;
 import android.app.LoaderManager;
 import android.content.CursorLoader;
+import android.content.Intent;
 import android.content.Loader;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -40,6 +42,7 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
     }
 
     public static final String EXTRA_WEATHER_DATE = "me.aerovulpe.sunshine.extra.WEATHER_DETAILS";
+    private static final String LOG_TAG = ForecastFragment.class.getSimpleName();
     ListView mListView;
     ForecastAdapter mForecastAdapter;
 
@@ -62,7 +65,9 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
             WeatherEntry.COLUMN_SHORT_DESC,
             WeatherEntry.COLUMN_MAX_TEMP,
             WeatherEntry.COLUMN_MIN_TEMP,
-            LocationEntry.COLUMN_LOCATION_SETTING
+            LocationEntry.COLUMN_LOCATION_SETTING,
+            LocationEntry.COLUMN_COORD_LAT,
+            LocationEntry.COLUMN_COORD_LONG
     };
 
     // These indices are tied to FORECAST_COLUMNS.  If FORECAST_COLUMNS changes, these
@@ -73,6 +78,8 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
     public static final int COL_WEATHER_MAX_TEMP = 4;
     public static final int COL_WEATHER_MIN_TEMP = 5;
     public static final int COL_LOCATION_SETTING = 6;
+    public static final int COL_COORD_LAT = 7;
+    public static final int COL_COORD_LONG = 8;
 
     public ForecastFragment() {
     }
@@ -101,9 +108,9 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
                 ForecastAdapter adapter = (ForecastAdapter) parent.getAdapter();
                 Cursor cursor = adapter.getCursor();
 
-                if (cursor != null && cursor.moveToPosition(position)){
+                if (cursor != null && cursor.moveToPosition(position)) {
                     String forecastDate = cursor.getString(COL_WEATHER_DATE);
-                    ((Callback)getActivity()).onItemSelected(forecastDate);
+                    ((Callback) getActivity()).onItemSelected(forecastDate);
                     mPosition = position;
                 }
             }
@@ -126,7 +133,6 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
     @Override
     public void onResume() {
         super.onResume();
-        updateWeather();
         if (mLocation != null && !mLocation.equals(Utility.getPreferredLocation(getActivity()))) {
             getLoaderManager().restartLoader(FORECAST_LOADER, null, this);
         }
@@ -140,8 +146,8 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
-            case R.id.action_refresh:
-                updateWeather();
+            case R.id.action_map:
+                openPreferredLocationInMap();
                 return true;
         }
         return super.onOptionsItemSelected(item);
@@ -193,12 +199,33 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
         mForecastAdapter.swapCursor(null);
     }
 
-    public void setIsSinglePane(boolean isSinglePane){
+    public void setIsSinglePane(boolean isSinglePane) {
         if (mForecastAdapter != null) mForecastAdapter.setIsSinglePane(isSinglePane);
     }
 
-    private void updateWeather() {
-        String location = Utility.getPreferredLocation(getActivity());
-        new FetchWeatherTask(getActivity()).execute(location);
+    private void openPreferredLocationInMap() {
+
+        // Using the URI scheme for showing a location found on a map.  This super-handy
+        // intent can is detailed in the "Common Intents" page of Android's developer site:
+        // http://developer.android.com/guide/components/intents-common.html#Maps
+        if ( null != mForecastAdapter ) {
+            Cursor c = mForecastAdapter.getCursor();
+            if ( null != c ) {
+                c.moveToPosition(0);
+                String posLat = c.getString(COL_COORD_LAT);
+                String posLong = c.getString(COL_COORD_LONG);
+                Uri geoLocation = Uri.parse("geo:" + posLat + "," + posLong);
+
+                Intent intent = new Intent(Intent.ACTION_VIEW);
+                intent.setData(geoLocation);
+
+                if (intent.resolveActivity(getActivity().getPackageManager()) != null) {
+                    startActivity(intent);
+                } else {
+                    Log.d(LOG_TAG, "Couldn't call " + geoLocation.toString() + ", no receiving apps installed!");
+                }
+            }
+
+        }
     }
 }
